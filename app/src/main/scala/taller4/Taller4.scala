@@ -30,32 +30,39 @@ object Taller4{
     v
   }
 
-  def compararAlgoritmos(funcion1: (Matriz, Matriz) => Matriz, funcion2: (Matriz, Matriz) => Matriz)
-                        (matriz1: Matriz, matriz2: Matriz): (Double, Double, Double) = {
-    val tiempoFuncion1 = withWarmer(new Warmer.Default) measure {
-      funcion1(matriz1, matriz2)
+  def transpuesta(m: Matriz): Matriz = {
+    val l = m.length
+    Vector.tabulate(l, l)((i, j) => m(j)(i))
+  }
+
+  def prodPunto(v1: Vector[Int], v2: Vector[Int]): Int = {
+    (v1 zip v2).map({ case (i, j) => i * j }).sum
+  }
+
+  def subMatriz(m: Matriz, i: Int, j: Int, l: Int): Matriz = {
+    Vector.tabulate(l, l)((f, c) => m(i + f)(j + c))
+  }
+
+  def restaMatriz(m1: Matriz, m2: Matriz): Matriz = {
+    val n = m1.length
+    Vector.tabulate(n, n) { (i, j) =>
+      m1(i)(j) - m2(i)(j)
     }
-    val tiempoFuncion2 = withWarmer(new Warmer.Default) measure {
-      funcion2(matriz1, matriz2)
+  }
+
+  def sumMatriz(m1: Matriz, m2: Matriz): Matriz = {
+    val n = m1.length
+    Vector.tabulate(n, n) { (i, j) =>
+      m1(i)(j) + m2(i)(j)
     }
-    val tiempo1: Double = tiempoFuncion1.value
-    val tiempo2: Double = tiempoFuncion2.value
-    val aceleracion = tiempo1 / tiempo2
-    (tiempo1, tiempo2,aceleracion)
   }
-  def prodPunto(v1:Vector[Int],v2:Vector[Int]):Int = {
-    (v1 zip v2).map({case (i,j)=>i*j}).sum
-  }
-  def transpuesta (m:Matriz):Matriz = {
-    val l=m.length
-    Vector.tabulate(l,l)((i,j)=>m(j)(i))
-  }
+
   def mulMatriz(m1:Matriz,m2:Matriz):Matriz = {
     val m2t = transpuesta(m2)
     val l = m1.length
     Vector.tabulate(l,l)((i,j)=>prodPunto(m1(i),m2t(j)))
   }
-  // usando task multiplicar matrices de froma parallela
+
   def multMatrizParalelo(m1: Matriz, m2: Matriz): Matriz = {
     val m2t = transpuesta(m2)
     val (m1a, m1b) = m1.splitAt(m1.length / 2)
@@ -66,15 +73,6 @@ object Taller4{
     top.join() ++ bot.join()
   }
 
-  def subMatriz(m: Matriz, i: Int, j: Int, l: Int): Matriz = {
-    Vector.tabulate(l, l)((f, c) => m(i + f)(j + c))
-  }
-  def sumMatriz(m1: Matriz, m2: Matriz): Matriz = {
-    val n = m1.length
-    Vector.tabulate(n, n) { (i, j) =>
-      m1(i)(j) + m2(i)(j)
-    }
-  }
   def multMatrizRec(m1: Matriz, m2: Matriz): Matriz = {
     val n = m1.length
 
@@ -151,18 +149,7 @@ object Taller4{
     }
   }
 
-  def sumarMatrices(m1: Matriz, m2: Matriz): Matriz = {
-    Vector.tabulate(m1.size, m1.head.size) { (i, j) =>
-      m1(i)(j) + m2(i)(j)
-    }
-  }
 
-  def restaMatriz(m1:Matriz, m2:Matriz):Matriz = {
-    val n = m1.length
-    Vector.tabulate(n,n){(i,j)=>
-      m1(i)(j)-m2(i)(j)
-    }
-  }
 
   def multStrassen(m1: Matriz, m2: Matriz): Matriz = {
 
@@ -249,6 +236,20 @@ object Taller4{
       }
     }
   }
+
+  def compararAlgoritmos(funcion1: (Matriz, Matriz) => Matriz, funcion2: (Matriz, Matriz) => Matriz)
+                        (matriz1: Matriz, matriz2: Matriz): (Double, Double, Double) = {
+    val tiempoFuncion1 = withWarmer(new Warmer.Default) measure {
+      funcion1(matriz1, matriz2)
+    }
+    val tiempoFuncion2 = withWarmer(new Warmer.Default) measure {
+      funcion2(matriz1, matriz2)
+    }
+    val tiempo1: Double = tiempoFuncion1.value
+    val tiempo2: Double = tiempoFuncion2.value
+    val aceleracion = tiempo1 / tiempo2
+    (tiempo1, tiempo2, aceleracion)
+  }
   def main(args: Array[String]): Unit = {
 
     val matriz1: Matriz = Vector(
@@ -317,10 +318,20 @@ object Taller4{
 
     //println(compararAlgoritmos(multMatrizRec,multMatrizRecPar)(matriz1,matriz2))
 
-    //
-    println(compararAlgoritmos(mulMatriz,multMatrizParalelo)(matrizAlAzar(32,8),matrizAlAzar(32,8)))
-    println(compararAlgoritmos(multMatrizRec,multMatrizRecPar)(matrizAlAzar(32,8),matrizAlAzar(32,8)))
+    /*
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(2,8),matrizAlAzar(2,8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(4, 8), matrizAlAzar(4, 8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(8, 8), matrizAlAzar(8, 8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(16, 8), matrizAlAzar(16, 8)))
     println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(32, 8), matrizAlAzar(32, 8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(64, 8), matrizAlAzar(64, 8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(128, 8), matrizAlAzar(128, 8)))
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(256, 8), matrizAlAzar(256, 8)))
+    */
+    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(512, 8), matrizAlAzar(512, 8)))
+
+    //println(compararAlgoritmos(multMatrizRec,multMatrizRecPar)(matrizAlAzar(32,8),matrizAlAzar(32,8)))
+    //println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(32, 8), matrizAlAzar(32, 8)))
 
     /*
     for {
