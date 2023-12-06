@@ -127,8 +127,6 @@ class TestTaller4 extends AnyFunSuite{
     //test de la funcion basica secuencial
     test("testmultmatriz1") {
         assert(matrizresultado1_2 == Taller4.mulMatriz(matriz1, matriz2))
-        //lloremos juntos :(
-        // cual forma de llorar es la mejor? :(
     }
     test("testmultmatriz2") {
         assert(matrizresultado3_4 == Taller4.mulMatriz(matriz3, matriz4))
