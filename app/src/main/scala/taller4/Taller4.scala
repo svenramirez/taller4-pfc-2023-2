@@ -15,6 +15,7 @@ import org.scalameter.withWarmer
 import org.scalameter.Warmer
 import common._
 import scala.util.Random
+import scala.collection.parallel.immutable.ParVector
 
 
 
@@ -23,11 +24,29 @@ import scala.util.Random
 object Taller4{
 
   type Matriz = Vector[Vector[Int]]
-  def matrizAlAzar(long: Int, vals: Int): Matriz =  {
+  val random = new Random
 
+  def matrizAlAzar(long: Int, vals: Int): Matriz =  {
     val random = new Random()
     val v = Vector.fill(long, long)(random.nextInt(vals))
     v
+  }
+
+  def vectorAlAzar(long: Int, vals: Int): Vector[Int] = {
+    val v = Vector.fill(long) {
+      random.nextInt(vals)   }
+      v
+  }
+
+  def vectorAlAzarPar(long: Int, vals: Int): ParVector[Int] = {
+    val random = new Random()
+    val v = ParVector.fill(long) {
+      random.nextInt(vals)   }
+      v
+  }
+
+  def prodPuntoParD(v1: ParVector[Int], v2: ParVector[Int]): Int = {
+    (v1 zip v2).map({ case (i, j) => i * j }).sum
   }
 
   def transpuesta(m: Matriz): Matriz = {
@@ -56,6 +75,7 @@ object Taller4{
       m1(i)(j) + m2(i)(j)
     }
   }
+
 
   def mulMatriz(m1:Matriz,m2:Matriz):Matriz = {
     val m2t = transpuesta(m2)
@@ -250,21 +270,27 @@ object Taller4{
     val aceleracion = tiempo1 / tiempo2
     (tiempo1, tiempo2, aceleracion)
   }
+
+  def compararProdPunto(l: Int): (Double, Double, Double) = {
+    val v1 = vectorAlAzar(l, 2)
+    val v2 = vectorAlAzar(l, 2)
+    val v1Par = vectorAlAzarPar(l, 2)
+    val v2Par = vectorAlAzarPar(l, 2)
+
+    val tiempoAlgoritmo1 = withWarmer(new Warmer.Default) measure {
+      prodPunto(v1, v2)
+    }
+    val tiempoAlgoritmo2 = withWarmer(new Warmer.Default) measure {
+      prodPuntoParD(v1Par, v2Par)
+    }
+
+    val promedio = tiempoAlgoritmo1.value / tiempoAlgoritmo2.value
+    (tiempoAlgoritmo1.value, tiempoAlgoritmo2.value, promedio)
+
+  }
   def main(args: Array[String]): Unit = {
 
-    val matriz1: Matriz = Vector(
-      Vector(1, 2, 3, 4),
-      Vector(5, 6, 7, 8),
-      Vector(9, 10, 11, 12),
-      Vector(13, 14, 15, 16)
-    )
 
-    val matriz2: Matriz = Vector(
-      Vector(17, 18, 19, 20),
-      Vector(21, 22, 23, 24),
-      Vector(25, 26, 27, 28),
-      Vector(29, 30, 31, 32)
-    )
 
 
 
@@ -316,31 +342,21 @@ object Taller4{
     */
     //comparar algoritmos
 
-    //println(compararAlgoritmos(multMatrizRec,multMatrizRecPar)(matriz1,matriz2))
+    println(compararAlgoritmos(mulMatriz,multMatrizParalelo)(matrizAlAzar(2,2),matrizAlAzar(2,2)))
 
-    /*
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(2,8),matrizAlAzar(2,8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(4, 8), matrizAlAzar(4, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(8, 8), matrizAlAzar(8, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(16, 8), matrizAlAzar(16, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(32, 8), matrizAlAzar(32, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(64, 8), matrizAlAzar(64, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(128, 8), matrizAlAzar(128, 8)))
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(256, 8), matrizAlAzar(256, 8)))
-    */
-    println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(512, 8), matrizAlAzar(512, 8)))
 
-    //println(compararAlgoritmos(multMatrizRec,multMatrizRecPar)(matrizAlAzar(32,8),matrizAlAzar(32,8)))
-    //println(compararAlgoritmos(multStrassen, multStrassenPar)(matrizAlAzar(32, 8), matrizAlAzar(32, 8)))
+    println("comparacion producto punto 10",compararProdPunto(10))
+    println("comparacion producto punto 100",compararProdPunto(100))
+    println("comparacion producto punto 1000",compararProdPunto(1000))
+    println("comparacion producto punto 10000",compararProdPunto(10000))
+    println("comparacion producto punto 100000",compararProdPunto(100000))
+    println("comparacion producto punto 1000000",compararProdPunto(1000000))
+    println("comparacion producto punto 10000000",compararProdPunto(10000000))
 
-    /*
-    for {
-      i <- 1 to 10
-      m1 = matrizAlAzar(math.pow(2, i).toInt, 2)
-      m2 = matrizAlAzar(math.pow(2, i).toInt, 2)
-    } yield (println(compararAlgoritmos(multMatrizRec, multMatrizRecPar)(m1, m2), math.pow(2, i).toInt))
 
-     */
+
+
+
 
 
 
