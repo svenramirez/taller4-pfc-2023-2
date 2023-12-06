@@ -1,11 +1,7 @@
+
 /**
-  * Taller 3 - Programación Funcional
-  * Autores: <Estudiantes>
-  * Profesor: Carlos A Delgado
-  */
-/**
- * Taller 3 - Programación Funcional
- * Autores: <Estudiantes>
+ * Taller 4 - Programación Concurrente
+ * Autores: kevin steven ramirez torres 2259371, Juan David Rojas 2259673, Juan Camilo Diaz 2259583.
  * Profesor: Carlos A Delgado
  */
 package taller4
@@ -16,6 +12,7 @@ import org.scalameter.Warmer
 import common._
 import scala.util.Random
 import scala.collection.parallel.immutable.ParVector
+import scala.math
 
 
 
@@ -291,59 +288,15 @@ object Taller4{
   def main(args: Array[String]): Unit = {
 
 
+    val resultList = for {
+      i <- 1 to 7
+      m1 = matrizAlAzar(math.pow(2, i).toInt, 2)
+      m2 = matrizAlAzar(math.pow(2, i).toInt, 2)
+    } yield (compararAlgoritmos(multMatrizRec, multMatrizRecPar) (m1, m2), math.pow(2, i).toInt)
 
-
-
-    /*
-    println("\nResultado (Multiplicación de Matrices - Secuencial):")
-    mulMatriz(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-
-    /*
-     */
-    // Mostrar el resultado de la multiplicación de matrices
-
-    println("\nResultado (Multiplicación de Matrices - paralela):")
-    multMatrizzPar(matriz1, matriz2 ).foreach(row => println(row.mkString(" ")))
-    */
-
-    /*
-    val submatrizA11 = subMatriz(matriz1, 0, 0, matriz1.length / 2)
-    val submatrizA22 = subMatriz(matriz1, (matriz1.length / 2)-1, (matriz1.length / 2)-1, 3)
-
-    println("Submatriz A11:")
-    submatrizA11.foreach(row => println(row.mkString(" ")))
-
-    println("\nSubmatriz A22:")
-    submatrizA22.foreach(row => println(row.mkString(" ")))
-    */
-    /*
-    println("\nResultado (SUMA de Matrices - secuencial):")
-    sumMatriz(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-    */
-
-    /*
-    println("\nResultado (Multiplicación de Matrices - recursiva secuencial):")
-    multMatrizRec(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-
-
-
-    println("\nResultado (Multiplicación de Matrices - recursiva paralela):")
-    multMatrizRecPar(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-    */
-
-    /*
-    println("\nResultado (Multiplicación de Matrices - strassen secuencial):")
-    multStrassen(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-    */
-
-    /*
-    println("\nResultado (Multiplicación de Matrices - strassen paralela):")
-    multStrassenPar(matriz1, matriz2).foreach(row => println(row.mkString(" ")))
-    */
-    //comparar algoritmos
-
-    println(compararAlgoritmos(mulMatriz,multMatrizParalelo)(matrizAlAzar(2,2),matrizAlAzar(2,2)))
-
+    for ((resultado, exponente) <- resultList) {
+      println(s"Resultado: $resultado, Exponente: $exponente")
+    }
 
     println("comparacion producto punto 10",compararProdPunto(10))
     println("comparacion producto punto 100",compararProdPunto(100))
